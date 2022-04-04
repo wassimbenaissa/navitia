@@ -112,6 +112,11 @@ class ZmqSocket(six.with_metaclass(ABCMeta, object)):
         except pybreaker.CircuitBreakerError:
             raise DeadSocketException(self.name, self.zmq_socket)
 
+    def clean_up_zmq_sockets(self):
+        for socket in self._sockets:
+            socket.setsockopt(zmq.LINGER, 0)
+            socket.close()
+
     @staticmethod
     def is_zmq_socket():
         return True

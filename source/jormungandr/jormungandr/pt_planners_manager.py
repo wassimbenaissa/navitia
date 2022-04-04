@@ -59,6 +59,11 @@ class PtPlannersManager(object):
             if self.old_configs.get(k) == configs[k]:
                 continue
 
+            # config has changed regarding the old one, we must close all
+            # zmq sockets before opening new ones
+            if k in self.pt_planners and self.pt_planners[k].is_zmq_socket():
+                self.pt_planners[k].clean_up_zmq_sockets()
+
             self.pt_planners[k] = utils.create_object(configs[k])
             self.old_configs[k] = configs[k]
 
