@@ -712,10 +712,10 @@ class Instance(object):
         logger = logging.getLogger(__name__)
         now = time.time()
 
-        def _reap_sockets(connector, sockets):
+        def _reap_sockets(connector):
             while True:
                 try:
-                    socket, t = sockets.popleft()
+                    socket, t = connector._sockets.popleft()
                     if now - t > ttl:
                         logger.debug("closing one socket for %s", connector.name)
                         socket.setsockopt(zmq.LINGER, 0)
@@ -728,8 +728,8 @@ class Instance(object):
 
         for _, planner in self._pt_planner_manager.get_all_pt_planners():
             if planner.is_zmq_socket():
-                _reap_sockets(planner, planner.get_sockets())
-        _reap_sockets(self, self._sockets)
+                _reap_sockets(planner)
+        _reap_sockets(self)
 
     @contextmanager
     def socket(self, context):
